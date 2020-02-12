@@ -1,4 +1,4 @@
-import { OrbitControls } from '/jsm/controls/OrbitControls.js';
+import { OrbitControls } from './jsm/controls/OrbitControls.js';
 
 		var camera, scene, renderer;
 		var plane;
