@@ -20,6 +20,8 @@
 
 <body>
 
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/three.js/102/three.js'></script>
+
 	<div id="info">
 		<a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> - voxel painter - webgl<br>
 		<strong>click</strong>: add voxel, <strong>shift + click</strong>: remove voxel
@@ -27,7 +29,7 @@
 
 	<script type="module">
 
-		import * as THREE from '/node_modules/three/build/three.js';
+		import { OrbitControls } from '/jsm/controls/OrbitControls.js';
 
 		var camera, scene, renderer;
 		var plane;
@@ -40,6 +42,11 @@
 
 		init();
 		render();
+
+		var controls = new OrbitControls(camera, renderer.domElement);
+		controls.update();
+		controls.target.set(0, 0, 0);
+		controls.enablePan = false;
 
 		function init() {
 
