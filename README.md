@@ -11,7 +11,7 @@ Task list
 - [x] Initialize workspace
 - [ ] Take input points to draw boxes
 - [ ] Interactive UI
-- [ ] Camera movement
+- [x] Camera movement
 - [ ] Object selection to UI
 - [ ] Custom texture settings
 - [ ] FPS monitor
