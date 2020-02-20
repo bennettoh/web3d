@@ -9,7 +9,8 @@
 </head>
 
 <body>
-  <div id="info"><a href='https://github.com/bennettoh/web3d' target="blank">Click to go to github repo</a></div>
+  <div id="info"><a href='https://github.com/bennettoh/web3d' target="blank">Click to go to github repo</a> <br>
+  Choose tool from right and cancel with Esc</div>
   <script src='https://cdnjs.cloudflare.com/ajax/libs/three.js/102/three.js'></script>
   <script src='https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.2/TweenMax.min.js'></script>
   <script type="module">
@@ -18,8 +19,9 @@
     import { GUI } from './jsm/libs/dat.gui.module.js';
 
     var params = {
-      drawLine: false,
-      placeBox: false
+      drawLine: toolLine,
+      placeBox: toolBoxPlace,
+      deleteBox: toolBoxDelete
     };
 
     var camera, scene, renderer;
@@ -33,6 +35,8 @@
     var objects = [];
     var points = [];
 
+    var toolCurrent;
+
     init();
     render();
 
@@ -41,6 +45,21 @@
     controls.update();
     controls.target.set(0, 0, 0);
     controls.enablePan = false;
+
+    function toolBoxPlace() {
+      console.log('Enabled box placement');
+      toolCurrent = 'BOXPLACE';
+    }
+
+    function toolBoxDelete() {
+      console.log('Enabled box deletion');
+      toolCurrent = 'BOXDEL';
+    }
+
+    function toolLine() {
+      console.log('Enabled line drawing');
+      toolCurrent = 'LINEDRAW';
+    }
 
     function init() {
 
@@ -119,6 +138,7 @@
       var gui = new GUI();
       gui.add(params, 'drawLine');
       gui.add(params, 'placeBox');
+      gui.add(params, 'deleteBox');
     }
 
     function onWindowResize() {
@@ -140,13 +160,10 @@
 
       var intersects = raycaster.intersectObjects(objects);
 
-      if (intersects.length > 0 && params.drawLine) {
+      if (intersects.length > 0) {
 
         var intersect = intersects[0]; // first object in contact
         rollOverMeshPlane.position.copy(intersect.point).add(intersect.face.normal);
-        console.log(intersect.point);
-        points.push(intersect.point);
-        rollOverMeshLine.geometry.setFromPoints(points);
         // rollOverMesh.position.copy(intersect.point).add(intersect.face.normal);
         // rollOverMesh.position.divideScalar(50).floor().multiplyScalar(50).addScalar(25);
 
@@ -162,34 +179,33 @@
       raycaster.setFromCamera(mouse, camera);
       var intersects = raycaster.intersectObjects(objects);
 
-      if (intersects.length > 0 && params.placeBox) {
+      if (intersects.length > 0) {
 
         var intersect = intersects[0];
 
         // delete cube
 
-        if (isShiftDown) {
-
+        if (toolCurrent == 'BOXDEL') {
           if (intersect.object !== plane) {
-
             scene.remove(intersect.object);
-
             objects.splice(objects.indexOf(intersect.object), 1);
-
           }
 
           // create cube
 
-        } else {
-
+        } else if (toolCurrent == 'BOXPLACE') {
           var voxel = new THREE.Mesh(cubeGeo, cubeMaterial);
           voxel.position.copy(intersect.point).add(intersect.face.normal);
           voxel.position.divideScalar(50).floor().multiplyScalar(50).addScalar(25);
           scene.add(voxel);
           objects.push(voxel);
 
-          let point = new THREE.Vector3(intersect.point);
-          points.push(point);
+          // draw lines
+
+        } else if (toolCurrent == 'LINEDRAW') {
+          points.push(intersect.point);
+          rollOverMeshLine.geometry.setFromPoints(points);
+          
         }
 
         render();
@@ -203,6 +219,7 @@
       switch (event.keyCode) {
 
         case 16: isShiftDown = true; break;
+        case 27: toolCurrent = undefined;
 
       }
 

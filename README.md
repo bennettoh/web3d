@@ -9,9 +9,10 @@ A three.js project that automates simple building design.
 Task list
 
 - [x] Initialize workspace
-- [ ] Take input points to draw boxes
-- [ ] Interactive UI
+- [x] User input from GUI
+- [x] User input onscreen to 3D space
 - [x] Camera movement
+- [ ] Draw simple geometries
 - [ ] Object selection to UI
 - [ ] Custom texture settings
 - [ ] FPS monitor
