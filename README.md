@@ -4,7 +4,11 @@ Web3D
 [![Dependencies][dependencies]][dependencies-url]
 [![Language Grade][lgtm]][lgtm-url]
 
-A three.js project that automates simple building design.
+Web3D is an interactive 3D modeling environment on web browser without additional plug-ins. 
+
+<div align="center">
+	<img width="30%" height="30%" src="https://github.com/bennettoh/web3d/tree/master/img/web3d_animated.gif" alt="HW3">
+</div>
 
 Task list
 
@@ -12,10 +16,11 @@ Task list
 - [x] User input from GUI
 - [x] User input onscreen to 3D space
 - [x] Camera movement
-- [ ] Draw simple geometries
+- [ ] Vertical line
+- [ ] Box from screen input
 - [ ] Object selection to UI
 - [ ] Custom texture settings
-- [ ] FPS monitor
+- [ ] Gizmo transformation
 
 
 #### three.js ####
