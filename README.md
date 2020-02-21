@@ -7,7 +7,7 @@ Web3D
 Web3D is an interactive 3D modeling environment on web browser without additional plug-ins. 
 
 <div align="center">
-	<img width="30%" height="30%" src="https://github.com/bennettoh/web3d/tree/gh-pages/img/web3d_animated.gif" alt="HW3">
+	<img width="30%" height="30%" src="https://github.com/bennettoh/web3d/blob/gh-pages/img/web3d_animated.gif?raw=true" alt="Preview">
 </div>
 
 Task list
