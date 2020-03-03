@@ -4,10 +4,11 @@ Web3D
 [![Dependencies][dependencies]][dependencies-url]
 [![Language Grade][lgtm]][lgtm-url]
 
-Web3D is an interactive 3D modeling environment on web browser without additional plug-ins.
+
+Web3D is an interactive 3D modeling environment on web browser without additional plug-ins. 
 
 <div align="center">
-	<img width="30%" height="30%" src="https://github.com/bennettoh/web3d/blob/gh-pages/img/web3d_animated.gif?raw=true" alt="Preview">
+	<img width="100%" height="100%" src="https://github.com/bennettoh/web3d/blob/gh-pages/img/web3d_animated.gif?raw=true" alt="Preview">
 </div>
 
 Task list
@@ -23,7 +24,7 @@ Task list
 - [ ] Gizmo transformation
 
 
-#### three.js ####
+### three.js ###
 
 three.js is a JavaScript 3D library to create an easy to use, lightweight, 3D library with a default WebGL renderer. The library also provides Canvas 2D, SVG and CSS3D renderers in the examples.
 

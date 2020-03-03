@@ -4,15 +4,245 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Web3D | Draft Online Together</title>
+  <title>Web3D | 3D Modeling on Browser</title>
   <link rel="stylesheet" href="css/main.css">
 </head>
 
 <body>
-  <div id="info"><a href='https://github.com/bennettoh/web3d' target="blank">Click to go to github repo</a></div>
+
+  <div id="info"><a href='https://github.com/bennettoh/web3d' target="blank">Click to go to github repo</a> <br>
+  Choose tool from right and cancel with Esc</div>
   <script src='https://cdnjs.cloudflare.com/ajax/libs/three.js/102/three.js'></script>
   <script src='https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.2/TweenMax.min.js'></script>
-  <script src='app.js' type="module"></script>
+  <script type="module">
+
+    import { OrbitControls } from './jsm/controls/OrbitControls.js';
+    import { GUI } from './jsm/libs/dat.gui.module.js';
+
+    var params = {
+      drawLine: toolLine,
+      placeBox: toolBoxPlace,
+      deleteBox: toolBoxDelete
+    };
+
+    var camera, scene, renderer;
+    var plane;
+    var mouse, raycaster, isShiftDown = false;
+
+    var rollOverMesh, rollOverMaterial, rollOverMeshPlane;
+    var rollOverMeshLine, rollOverLineMaterial;
+    var cubeGeo, cubeMaterial;
+
+    var objects = [];
+    var points = [];
+
+    var toolCurrent;
+
+    init();
+    render();
+
+    // Orbit controls
+    var controls = new OrbitControls(camera, renderer.domElement);
+    controls.update();
+    controls.target.set(0, 0, 0);
+    controls.enablePan = false;
+
+    function toolBoxPlace() {
+      console.log('Enabled box placement');
+      toolCurrent = 'BOXPLACE';
+    }
+
+    function toolBoxDelete() {
+      console.log('Enabled box deletion');
+      toolCurrent = 'BOXDEL';
+    }
+
+    function toolLine() {
+      console.log('Enabled line drawing');
+      toolCurrent = 'LINEDRAW';
+    }
+
+    function init() {
+
+      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
+      camera.position.set(500, 800, 1300);
+      camera.lookAt(0, 0, 0);
+
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0xf0f0f0);
+
+      // roll-over helpers
+
+      // var rollOverGeo = new THREE.BoxBufferGeometry(50, 50, 50);
+      rollOverMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000, opacity: 0.5, transparent: true });
+      // rollOverMesh = new THREE.Mesh(rollOverGeo, rollOverMaterial);
+      // scene.add(rollOverMesh);
+
+      var rollOverGeoPlane = new THREE.PlaneBufferGeometry(50, 50);
+      rollOverGeoPlane.rotateX(- Math.PI / 2);
+      rollOverMeshPlane = new THREE.Mesh(rollOverGeoPlane, rollOverMaterial);
+      scene.add(rollOverMeshPlane);
+
+      var lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
+      rollOverLineMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
+      rollOverMeshLine = new THREE.Line(lineGeometry, rollOverLineMaterial);
+      scene.add(rollOverMeshLine);
+
+      // cubes
+
+      cubeGeo = new THREE.BoxBufferGeometry(50, 50, 50);
+      cubeMaterial = new THREE.MeshNormalMaterial();
+
+      // grid
+
+      var gridHelper = new THREE.GridHelper(1000, 20);
+      scene.add(gridHelper);
+
+      //
+
+      raycaster = new THREE.Raycaster();
+      mouse = new THREE.Vector2();
+
+      var geometry = new THREE.PlaneBufferGeometry(10000, 10000);
+      geometry.rotateX(- Math.PI / 2);
+
+      plane = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ visible: false }));
+      scene.add(plane);
+
+      objects.push(plane);
+
+      // lights
+
+      var ambientLight = new THREE.AmbientLight(0x606060);
+      scene.add(ambientLight);
+
+      var directionalLight = new THREE.DirectionalLight(0xffffff);
+      directionalLight.position.set(1, 0.75, 0.5).normalize();
+      scene.add(directionalLight);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      document.addEventListener('mousemove', onDocumentMouseMove, false);
+      document.addEventListener('mousedown', onDocumentMouseDown, false);
+      document.addEventListener('keydown', onDocumentKeyDown, false);
+      document.addEventListener('keyup', onDocumentKeyUp, false);
+
+      //
+
+      window.addEventListener('resize', onWindowResize, false);
+
+      // GUI
+
+      var gui = new GUI();
+      gui.add(params, 'drawLine');
+      gui.add(params, 'placeBox');
+      gui.add(params, 'deleteBox');
+    }
+
+    function onWindowResize() {
+
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+
+      renderer.setSize(window.innerWidth, window.innerHeight);
+
+    }
+
+    function onDocumentMouseMove(event) {
+
+      event.preventDefault();
+
+      mouse.set((event.clientX / window.innerWidth) * 2 - 1, - (event.clientY / window.innerHeight) * 2 + 1);
+
+      raycaster.setFromCamera(mouse, camera);
+
+      var intersects = raycaster.intersectObjects(objects);
+
+      if (intersects.length > 0) {
+
+        var intersect = intersects[0]; // first object in contact
+        rollOverMeshPlane.position.copy(intersect.point).add(intersect.face.normal);
+        // rollOverMesh.position.copy(intersect.point).add(intersect.face.normal);
+        // rollOverMesh.position.divideScalar(50).floor().multiplyScalar(50).addScalar(25);
+
+      }
+
+      render();
+
+    }
+
+    function onDocumentMouseDown(event) {
+      event.preventDefault();
+      mouse.set((event.clientX / window.innerWidth) * 2 - 1, - (event.clientY / window.innerHeight) * 2 + 1);
+      raycaster.setFromCamera(mouse, camera);
+      var intersects = raycaster.intersectObjects(objects);
+
+      if (intersects.length > 0) {
+
+        var intersect = intersects[0];
+
+        // delete cube
+
+        if (toolCurrent == 'BOXDEL') {
+          if (intersect.object !== plane) {
+            scene.remove(intersect.object);
+            objects.splice(objects.indexOf(intersect.object), 1);
+          }
+
+          // create cube
+
+        } else if (toolCurrent == 'BOXPLACE') {
+          var voxel = new THREE.Mesh(cubeGeo, cubeMaterial);
+          voxel.position.copy(intersect.point).add(intersect.face.normal);
+          voxel.position.divideScalar(50).floor().multiplyScalar(50).addScalar(25);
+          scene.add(voxel);
+          objects.push(voxel);
+
+          // draw lines
+
+        } else if (toolCurrent == 'LINEDRAW') {
+          points.push(intersect.point);
+          rollOverMeshLine.geometry.setFromPoints(points);
+          
+        }
+
+        render();
+
+      }
+
+    }
+
+    function onDocumentKeyDown(event) {
+
+      switch (event.keyCode) {
+
+        case 16: isShiftDown = true; break;
+        case 27: toolCurrent = undefined;
+
+      }
+
+    }
+
+    function onDocumentKeyUp(event) {
+
+      switch (event.keyCode) {
+
+        case 16: isShiftDown = false; break;
+
+      }
+
+    }
+
+    function render() {
+
+      renderer.render(scene, camera);
+
+    }
+
+  </script>
 </body>
 
 </html>
